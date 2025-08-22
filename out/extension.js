@@ -78,10 +78,15 @@ function activate(context) {
             if (choice !== 'Run anyway')
                 return;
         }
+        const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
+        const autoReset = cfg.get('autoResetOnApply', false);
         const terminal = createTerminal(cwd, 'Git Apply (Git Bash)');
         if (!terminal)
             return;
         terminal.show(true);
+        if (autoReset) {
+            terminal.sendText('git reset --hard', true);
+        }
         terminal.sendText(clip, false);
         terminal.sendText('', true);
     }));
@@ -103,16 +108,34 @@ function activate(context) {
         terminal.sendText('git reset --hard', true);
     }));
     const applyBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-    applyBtn.text = '$(git-commit) Apply (Clipboard)';
-    applyBtn.tooltip = 'Run `git apply ...` from clipboard (Git Bash on Windows)';
     applyBtn.command = applyCmd;
-    applyBtn.show();
     const resetHardBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
     resetHardBtn.text = '$(discard) Reset (Hard)';
     resetHardBtn.tooltip = 'Run `git reset --hard` (discard ALL changes)';
     resetHardBtn.command = resetHardCmd;
-    resetHardBtn.show();
-    context.subscriptions.push(runApply, runHardReset, applyBtn, resetHardBtn);
+    const updateStatusBar = () => {
+        const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
+        const autoReset = cfg.get('autoResetOnApply', false);
+        applyBtn.text = autoReset ? '$(git-commit) Reset & Apply (Clipboard)' : '$(git-commit) Apply (Clipboard)';
+        applyBtn.tooltip = autoReset
+            ? 'Run `git reset --hard` then `git apply ...` from clipboard (Git Bash on Windows)'
+            : 'Run `git apply ...` from clipboard (Git Bash on Windows)';
+        if (cfg.get('showResetButton', true)) {
+            resetHardBtn.show();
+        }
+        else {
+            resetHardBtn.hide();
+        }
+    };
+    updateStatusBar();
+    applyBtn.show();
+    const cfgListener = vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration('gitApplyFromClipboard.autoResetOnApply') ||
+            e.affectsConfiguration('gitApplyFromClipboard.showResetButton')) {
+            updateStatusBar();
+        }
+    });
+    context.subscriptions.push(runApply, runHardReset, applyBtn, resetHardBtn, cfgListener);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map

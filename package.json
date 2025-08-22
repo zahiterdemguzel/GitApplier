@@ -32,6 +32,16 @@
           "type": "string",
           "default": "C:\\\\Program Files\\\\Git\\\\bin\\\\bash.exe",
           "description": "Path to Git Bash executable on Windows."
+        },
+        "gitApplyFromClipboard.autoResetOnApply": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically run `git reset --hard` before applying patches from the clipboard."
+        },
+        "gitApplyFromClipboard.showResetButton": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the 'Reset (Hard)' status bar button."
         }
       }
     }
