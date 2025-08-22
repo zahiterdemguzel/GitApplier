@@ -1,6 +1,6 @@
 # Git Apply From Clipboard
 
-This extension adds a status bar button that runs the `git apply ...` command from your clipboard.
+This extension adds status bar buttons to run `git apply ...` from your clipboard or perform a `git reset --hard`.
 
 ## Windows Users
 - It will **force Git Bash**, so heredoc commands like `<<'EOF'` work.
@@ -10,5 +10,5 @@ This extension adds a status bar button that runs the `git apply ...` command fr
 ## Usage
 1. Copy your `git apply` command (can be multi-line, subshell, heredoc, etc.).
 2. Open your repo folder in VS Code.
-3. Click **Apply (Clipboard)** in the status bar, or run **Git: Apply from Clipboard**.
+3. Click **Apply (Clipboard)** to run your patch or **Reset (Hard)** to discard all local changes.
 

@@ -46,7 +46,8 @@ function createTerminal(cwd: string, name: string): vscode.Terminal | null {
 
 export function activate(context: vscode.ExtensionContext) {
   const applyCmd = 'gitApplyFromClipboard.run';
-  const resetCmd = 'gitApplyFromClipboard.resetHard';
+  // Command identifier for performing a hard reset on the current repo
+  const resetHardCmd = 'gitApplyFromClipboard.resetHard';
 
   const runApply = vscode.commands.registerCommand(applyCmd, async () => {
     const folders = vscode.workspace.workspaceFolders;
@@ -80,7 +81,8 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText('', true);
   });
 
-  const runReset = vscode.commands.registerCommand(resetCmd, async () => {
+  // Execute `git reset --hard` after explicit confirmation from the user
+  const runHardReset = vscode.commands.registerCommand(resetHardCmd, async () => {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders || folders.length === 0) {
       vscode.window.showErrorMessage('Open a folder or workspace first to run git reset.');
@@ -108,13 +110,13 @@ export function activate(context: vscode.ExtensionContext) {
   applyBtn.command = applyCmd;
   applyBtn.show();
 
-  const resetBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-  resetBtn.text = '$(discard) Reset (Hard)';
-  resetBtn.tooltip = 'Run `git reset --hard` (discard ALL changes)';
-  resetBtn.command = resetCmd;
-  resetBtn.show();
+  const resetHardBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+  resetHardBtn.text = '$(discard) Reset (Hard)';
+  resetHardBtn.tooltip = 'Run `git reset --hard` (discard ALL changes)';
+  resetHardBtn.command = resetHardCmd;
+  resetHardBtn.show();
 
-  context.subscriptions.push(runApply, runReset, applyBtn, resetBtn);
+  context.subscriptions.push(runApply, runHardReset, applyBtn, resetHardBtn);
 }
 
 export function deactivate() {}

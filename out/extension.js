@@ -58,7 +58,8 @@ function createTerminal(cwd, name) {
 }
 function activate(context) {
     const applyCmd = 'gitApplyFromClipboard.run';
-    const resetCmd = 'gitApplyFromClipboard.resetHard';
+    // Command identifier for performing a hard reset on the current repo
+    const resetHardCmd = 'gitApplyFromClipboard.resetHard';
     const runApply = vscode.commands.registerCommand(applyCmd, () => __awaiter(this, void 0, void 0, function* () {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) {
@@ -84,7 +85,8 @@ function activate(context) {
         terminal.sendText(clip, false);
         terminal.sendText('', true);
     }));
-    const runReset = vscode.commands.registerCommand(resetCmd, () => __awaiter(this, void 0, void 0, function* () {
+    // Execute `git reset --hard` after explicit confirmation from the user
+    const runHardReset = vscode.commands.registerCommand(resetHardCmd, () => __awaiter(this, void 0, void 0, function* () {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) {
             vscode.window.showErrorMessage('Open a folder or workspace first to run git reset.');
@@ -105,12 +107,12 @@ function activate(context) {
     applyBtn.tooltip = 'Run `git apply ...` from clipboard (Git Bash on Windows)';
     applyBtn.command = applyCmd;
     applyBtn.show();
-    const resetBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-    resetBtn.text = '$(discard) Reset (Hard)';
-    resetBtn.tooltip = 'Run `git reset --hard` (discard ALL changes)';
-    resetBtn.command = resetCmd;
-    resetBtn.show();
-    context.subscriptions.push(runApply, runReset, applyBtn, resetBtn);
+    const resetHardBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+    resetHardBtn.text = '$(discard) Reset (Hard)';
+    resetHardBtn.tooltip = 'Run `git reset --hard` (discard ALL changes)';
+    resetHardBtn.command = resetHardCmd;
+    resetHardBtn.show();
+    context.subscriptions.push(runApply, runHardReset, applyBtn, resetHardBtn);
 }
 function deactivate() { }
 //# sourceMappingURL=extension.js.map
