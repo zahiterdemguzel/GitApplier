@@ -1,0 +1,15 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Install Git Apply From Clipboard extension",
+      "type": "shell",
+      "command": "code --install-extension git-apply-from-clipboard.vsix --force",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
