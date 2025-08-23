@@ -90,7 +90,7 @@ function activate(context) {
         terminal.sendText(clip, false);
         terminal.sendText('', true);
     }));
-    // Execute `git reset --hard` after explicit confirmation from the user
+    // Execute `git reset --hard` immediately with no confirmation
     const runHardReset = vscode.commands.registerCommand(resetHardCmd, () => __awaiter(this, void 0, void 0, function* () {
         const folders = vscode.workspace.workspaceFolders;
         if (!folders || folders.length === 0) {
@@ -98,9 +98,6 @@ function activate(context) {
             return;
         }
         const cwd = folders[0].uri.fsPath;
-        const choice = yield vscode.window.showWarningMessage('This will run `git reset --hard` and discard ALL local changes. Are you sure?', 'Yes, reset hard', 'Cancel');
-        if (choice !== 'Yes, reset hard')
-            return;
         const terminal = createTerminal(cwd, 'Git Reset (Git Bash)');
         if (!terminal)
             return;
