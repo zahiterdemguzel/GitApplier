@@ -1,21 +1,21 @@
-import * as vscode from 'vscode';
-import * as os from 'os';
-import * as fs from 'fs';
+const vscode = require('vscode');
+const os = require('os');
+const fs = require('fs');
 
-function exists(p: string) {
+function exists(p) {
   try { return fs.existsSync(p); } catch { return false; }
 }
 
-function findGitBashPath(): string | null {
+function findGitBashPath() {
   const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
-  const configured = cfg.get<string>('gitBashPath');
+  const configured = cfg.get('gitBashPath');
   const candidates = [
     configured,
-    'C:\\\Program Files\\Git\\bin\\bash.exe',
-    'C:\\\Program Files\\Git\\git-bash.exe',
-    'C:\\\Program Files\\Git\\usr\\bin\\bash.exe',
-    'C:\\\Program Files (x86)\\Git\\bin\\bash.exe'
-  ].filter(Boolean) as string[];
+    'C:\\Program Files\\Git\\bin\\bash.exe',
+    'C:\\Program Files\\Git\\git-bash.exe',
+    'C:\\Program Files\\Git\\usr\\bin\\bash.exe',
+    'C:\\Program Files (x86)\\Git\\bin\\bash.exe'
+  ].filter(Boolean);
 
   for (const c of candidates) {
     if (exists(c)) return c;
@@ -23,7 +23,7 @@ function findGitBashPath(): string | null {
   return null;
 }
 
-function createTerminal(cwd: string, name: string): vscode.Terminal | null {
+function createTerminal(cwd, name) {
   if (os.platform() === 'win32') {
     const bashPath = findGitBashPath();
     if (!bashPath) {
@@ -44,9 +44,8 @@ function createTerminal(cwd: string, name: string): vscode.Terminal | null {
   }
 }
 
-export function activate(context: vscode.ExtensionContext) {
+function activate(context) {
   const applyCmd = 'gitApplyFromClipboard.run';
-  // Command identifier for performing a hard reset on the current repo
   const resetHardCmd = 'gitApplyFromClipboard.resetHard';
 
   const runApply = vscode.commands.registerCommand(applyCmd, async () => {
@@ -74,7 +73,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
 
     const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
-    const autoReset = cfg.get<boolean>('autoResetOnApply', false);
+    const autoReset = cfg.get('autoResetOnApply', false);
 
     const terminal = createTerminal(cwd, 'Git Apply (Git Bash)');
     if (!terminal) return;
@@ -87,7 +86,6 @@ export function activate(context: vscode.ExtensionContext) {
     terminal.sendText('', true);
   });
 
-  // Execute `git reset --hard` after explicit confirmation from the user
   const runHardReset = vscode.commands.registerCommand(resetHardCmd, async () => {
     const folders = vscode.workspace.workspaceFolders;
     if (!folders || folders.length === 0) {
@@ -120,12 +118,12 @@ export function activate(context: vscode.ExtensionContext) {
 
   const updateStatusBar = () => {
     const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
-    const autoReset = cfg.get<boolean>('autoResetOnApply', false);
+    const autoReset = cfg.get('autoResetOnApply', false);
     applyBtn.text = autoReset ? '$(git-commit) Reset & Apply (Clipboard)' : '$(git-commit) Apply (Clipboard)';
     applyBtn.tooltip = autoReset
       ? 'Run `git reset --hard` then `git apply ...` from clipboard (Git Bash on Windows)'
       : 'Run `git apply ...` from clipboard (Git Bash on Windows)';
-    if (cfg.get<boolean>('showResetButton', true)) {
+    if (cfg.get('showResetButton', true)) {
       resetHardBtn.show();
     } else {
       resetHardBtn.hide();
@@ -135,7 +133,7 @@ export function activate(context: vscode.ExtensionContext) {
   updateStatusBar();
   applyBtn.show();
 
-  const cfgListener = vscode.workspace.onDidChangeConfiguration((e: vscode.ConfigurationChangeEvent) => {
+  const cfgListener = vscode.workspace.onDidChangeConfiguration(e => {
     if (
       e.affectsConfiguration('gitApplyFromClipboard.autoResetOnApply') ||
       e.affectsConfiguration('gitApplyFromClipboard.showResetButton')
@@ -147,4 +145,10 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(runApply, runHardReset, applyBtn, resetHardBtn, cfgListener);
 }
 
-export function deactivate() {}
+function deactivate() {}
+
+module.exports = {
+  activate,
+  deactivate
+};
+
