@@ -2,13 +2,42 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Compile vsix package",
+      "type": "shell",
+      "command": "vsce package",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      }
+    },
+    {
       "label": "Install vscode extension",
       "type": "shell",
-      "command": "code --install-extension git-apply-from-clipboard.vsix --force",
+      "command": "code --install-extension git-apply-from-clipboard-1.0.0.vsix --force",
       "problemMatcher": [],
       "group": {
         "kind": "build",
         "isDefault": true
+      }
+    },
+    {
+      "label": "Test VSCode extensions",
+      "type": "shell",
+      "command": "code --command 'workbench.action.restartExtensionHost'",
+      "problemMatcher": [],
+      "group": {
+        "kind": "none"
+      }
+    },
+    {
+      "label": "Uninstall vscode extension",
+      "type": "shell",
+      "command": "code --uninstall-extension undefined_publisher.git-apply-from-clipboard",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": false
       }
     }
   ]

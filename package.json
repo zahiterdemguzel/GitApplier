@@ -2,7 +2,11 @@
   "name": "git-apply-from-clipboard",
   "displayName": "Git Apply from Clipboard",
   "description": "Adds buttons to apply git patches from clipboard or reset hard, using Git Bash.",
-  "version": "0.0.5",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zahiterdemguzel/GitApplier.git"
+  },
   "engines": {
     "vscode": "^1.60.0"
   },
