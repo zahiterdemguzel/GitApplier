@@ -94,13 +94,6 @@ function activate(context) {
     }
     const cwd = folders[0].uri.fsPath;
 
-    const choice = await vscode.window.showWarningMessage(
-      'This will run `git reset --hard` and discard ALL local changes. Are you sure?',
-      'Yes, reset hard',
-      'Cancel'
-    );
-    if (choice !== 'Yes, reset hard') return;
-
     const terminal = createTerminal(cwd, 'Git Reset (Git Bash)');
     if (!terminal) return;
 
