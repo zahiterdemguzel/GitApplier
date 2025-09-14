@@ -1,6 +1,7 @@
 # Git Apply From Clipboard
 
 This extension adds status bar buttons to run `git apply ...` from your clipboard or perform a `git reset --hard`.
+Commands are executed directly using your system shell, and a notification is shown when they complete.
 
 **Warning:** The **Reset (Hard)** button runs `git reset --hard` immediately without confirmation and discards all local changes.
 

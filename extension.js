@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const os = require('os');
 const fs = require('fs');
+const { exec } = require('child_process');
 
 function exists(p) {
   try { return fs.existsSync(p); } catch { return false; }
@@ -23,25 +24,29 @@ function findGitBashPath() {
   return null;
 }
 
-function createTerminal(cwd, name) {
-  if (os.platform() === 'win32') {
-    const bashPath = findGitBashPath();
-    if (!bashPath) {
-      vscode.window.showErrorMessage(
-        'Git Bash not found. Set "Git Apply From Clipboard › Git Bash Path" to your bash.exe (e.g., C:\\Program Files\\Git\\bin\\bash.exe).'
-      );
-      return null;
+function runShellCommand(command, cwd) {
+  return new Promise((resolve, reject) => {
+    const options = { cwd };
+    if (os.platform() === 'win32') {
+      const bashPath = findGitBashPath();
+      if (!bashPath) {
+        vscode.window.showErrorMessage(
+          'Git Bash not found. Set "Git Apply From Clipboard › Git Bash Path" to your bash.exe (e.g., C:\\Program Files\\Git\\bin\\bash.exe).'
+        );
+        reject(new Error('Git Bash not found'));
+        return;
+      }
+      options.shell = bashPath;
     }
 
-    return vscode.window.createTerminal({
-      name,
-      cwd,
-      shellPath: bashPath,
-      shellArgs: ['--login', '-i']
+    exec(command, options, (error, stdout, stderr) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve({ stdout, stderr });
+      }
     });
-  } else {
-    return vscode.window.createTerminal({ name, cwd });
-  }
+  });
 }
 
 function activate(context) {
@@ -75,15 +80,15 @@ function activate(context) {
     const cfg = vscode.workspace.getConfiguration('gitApplyFromClipboard');
     const autoReset = cfg.get('autoResetOnApply', false);
 
-    const terminal = createTerminal(cwd, 'Git Apply (Git Bash)');
-    if (!terminal) return;
-
-    terminal.show(true);
-    if (autoReset) {
-      terminal.sendText('git reset --hard', true);
+    try {
+      if (autoReset) {
+        await runShellCommand('git reset --hard', cwd);
+      }
+      await runShellCommand(clip, cwd);
+      vscode.window.showInformationMessage('Git apply completed.');
+    } catch (err) {
+      vscode.window.showErrorMessage(`Git apply failed: ${err.message}`);
     }
-    terminal.sendText(clip, false);
-    terminal.sendText('', true);
   });
 
   const runHardReset = vscode.commands.registerCommand(resetHardCmd, async () => {
@@ -94,11 +99,12 @@ function activate(context) {
     }
     const cwd = folders[0].uri.fsPath;
 
-    const terminal = createTerminal(cwd, 'Git Reset (Git Bash)');
-    if (!terminal) return;
-
-    terminal.show(true);
-    terminal.sendText('git reset --hard', true);
+    try {
+      await runShellCommand('git reset --hard', cwd);
+      vscode.window.showInformationMessage('Git reset --hard completed.');
+    } catch (err) {
+      vscode.window.showErrorMessage(`Git reset --hard failed: ${err.message}`);
+    }
   });
 
   const applyBtn = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
