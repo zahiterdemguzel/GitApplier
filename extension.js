@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const os = require('os');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { spawn } = require('child_process');
 
 function exists(p) {
   try { return fs.existsSync(p); } catch { return false; }
@@ -26,7 +26,8 @@ function findGitBashPath() {
 
 function runShellCommand(command, cwd) {
   return new Promise((resolve, reject) => {
-    const options = { cwd };
+    let shellPath = process.env.SHELL || '/bin/bash';
+    const args = [];
     if (os.platform() === 'win32') {
       const bashPath = findGitBashPath();
       if (!bashPath) {
@@ -36,16 +37,26 @@ function runShellCommand(command, cwd) {
         reject(new Error('Git Bash not found'));
         return;
       }
-      options.shell = bashPath;
+      shellPath = bashPath;
+      args.push('-s');
+    } else {
+      args.push('-s');
     }
 
-    exec(command, options, (error, stdout, stderr) => {
-      if (error) {
-        reject(error);
-      } else {
+    const child = spawn(shellPath, args, { cwd });
+    let stdout = '';
+    let stderr = '';
+    child.stdout.on('data', d => (stdout += d));
+    child.stderr.on('data', d => (stderr += d));
+    child.on('error', reject);
+    child.on('close', code => {
+      if (code === 0) {
         resolve({ stdout, stderr });
+      } else {
+        reject(new Error(stderr.trim() || `Command failed with exit code ${code}`));
       }
     });
+    child.stdin.end(command + '\n');
   });
 }
 
