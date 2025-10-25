@@ -13,8 +13,16 @@
     },
     {
       "label": "Install extension",
-      "type": "shell",
-      "command": "code --install-extension git-apply-from-clipboard-1.0.0.vsix --force",
+      "type": "process",
+      "command": "code",
+      "args": [
+        "--install-extension",
+        "${workspaceFolder}/git-apply-from-clipboard-1.0.0.vsix",
+        "--force"
+      ],
+      "osx": {
+        "command": "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code"
+      },
       "problemMatcher": [],
       "group": {
         "kind": "build",
