@@ -78,10 +78,10 @@ function activate(context) {
       return;
     }
 
-    const containsGitApply = /\bgit\s+apply\b/i.test(clip);
-    if (!containsGitApply) {
+    const containsSupportedCommand = /\b(?:git\s+apply|patch)\b/i.test(clip);
+    if (!containsSupportedCommand) {
       const choice = await vscode.window.showWarningMessage(
-        'Clipboard does not contain a "git apply" command.',
+        'Clipboard does not contain a "git apply" or "patch" command.',
         'Run anyway',
         'Cancel'
       );
@@ -131,8 +131,8 @@ function activate(context) {
     const autoReset = cfg.get('autoResetOnApply', false);
     applyBtn.text = autoReset ? '$(git-commit) Reset & Apply (Clipboard)' : '$(git-commit) Apply (Clipboard)';
     applyBtn.tooltip = autoReset
-      ? 'Run `git reset --hard` then `git apply ...` from clipboard (Git Bash on Windows)'
-      : 'Run `git apply ...` from clipboard (Git Bash on Windows)';
+      ? 'Run `git reset --hard` then a `git apply` or `patch` command from the clipboard (Git Bash on Windows)'
+      : 'Run a `git apply` or `patch` command from the clipboard (Git Bash on Windows)';
     if (cfg.get('showResetButton', true)) {
       resetHardBtn.show();
     } else {
